@@ -1,0 +1,19 @@
+{
+  "name": "kalorilaskuri",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "nodemon index.js"
+  },
+  "author": "Nico Hairetdin",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.4",
+    "express": "^4.16.3",
+    "mysql2": "^1.5.3",
+    "nodemon": "^1.18.1"
+  }
+}

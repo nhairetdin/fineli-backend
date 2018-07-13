@@ -1,0 +1,358 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
+
+-- -----------------------------------------------------
+-- Schema fineli
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema fineli
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `fineli` DEFAULT CHARACTER SET utf8 ;
+USE `fineli` ;
+
+-- -----------------------------------------------------
+-- Table `fineli`.`tietolahde`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`tietolahde` (
+  `thscode` CHAR(1) NOT NULL,
+  `description` VARCHAR(85) NULL,
+  `lang` VARCHAR(2) NULL,
+  PRIMARY KEY (`thscode`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`ravintotekijaluokka`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`ravintotekijaluokka` (
+  `thscode` VARCHAR(15) NOT NULL,
+  `description` VARCHAR(45) NULL,
+  `lang` VARCHAR(2) NULL,
+  PRIMARY KEY (`thscode`))
+ENGINE = InnoDB
+COMMENT = 'cmpclass_FI.csv';
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`ravintotekijayksikko`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`ravintotekijayksikko` (
+  `thscode` VARCHAR(15) NOT NULL,
+  `description` VARCHAR(45) NULL,
+  `lang` VARCHAR(2) NULL,
+  PRIMARY KEY (`thscode`))
+ENGINE = InnoDB
+COMMENT = 'compunit_FI.csv';
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`ravintotekijanimi`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`ravintotekijanimi` (
+  `thscode` VARCHAR(15) NOT NULL,
+  `description` VARCHAR(145) NULL,
+  `lang` VARCHAR(2) NULL,
+  PRIMARY KEY (`thscode`))
+ENGINE = InnoDB
+COMMENT = 'eufdname_FI.csv';
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`ravintotekija`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`ravintotekija` (
+  `eufdname` VARCHAR(15) NOT NULL,
+  `compunit` VARCHAR(15) NULL,
+  `cmpclass` VARCHAR(15) NULL,
+  `cmpclassp` VARCHAR(15) NULL,
+  PRIMARY KEY (`eufdname`),
+  INDEX `fk_ravintotekija_1_idx` (`compunit` ASC),
+  INDEX `fk_ravintotekija_3_idx` (`cmpclass` ASC),
+  INDEX `fk_ravintotekija_4_idx` (`cmpclassp` ASC),
+  CONSTRAINT `fk_ravintotekija_1`
+    FOREIGN KEY (`compunit`)
+    REFERENCES `fineli`.`ravintotekijayksikko` (`thscode`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_ravintotekija_2`
+    FOREIGN KEY (`eufdname`)
+    REFERENCES `fineli`.`ravintotekijanimi` (`thscode`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_ravintotekija_3`
+    FOREIGN KEY (`cmpclass`)
+    REFERENCES `fineli`.`ravintotekijaluokka` (`thscode`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_ravintotekija_4`
+    FOREIGN KEY (`cmpclassp`)
+    REFERENCES `fineli`.`ravintotekijaluokka` (`thscode`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+COMMENT = 'component.csv\n\r\nEUFDNAME (Ravintotekijän koodi, teksti)\n\r\nCOMPUNIT (Yksikön koodi, teksti)\n\r\nCMPCLASS (Ravintotekijäluokan koodi, teksti)\n\r\nCMPCLASSP (Ravintotekijäluokan koodi, luokan ylempi taso, teksti)';
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`raakaaineluokka`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`raakaaineluokka` (
+  `thscode` VARCHAR(15) NOT NULL,
+  `description` VARCHAR(45) NULL,
+  `lang` VARCHAR(2) NULL,
+  PRIMARY KEY (`thscode`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`ruoankayttoluokka`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`ruoankayttoluokka` (
+  `thscode` VARCHAR(15) NOT NULL,
+  `description` VARCHAR(75) NULL,
+  `lang` VARCHAR(2) NULL,
+  PRIMARY KEY (`thscode`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`valmistustapa`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`valmistustapa` (
+  `thscode` VARCHAR(15) NOT NULL,
+  `description` VARCHAR(45) NULL,
+  `lang` VARCHAR(2) NULL,
+  PRIMARY KEY (`thscode`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`elintarviketyyppi`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`elintarviketyyppi` (
+  `thscode` VARCHAR(15) NOT NULL,
+  `description` VARCHAR(45) NULL,
+  `lang` VARCHAR(2) NULL,
+  PRIMARY KEY (`thscode`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`elintarvike`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`elintarvike` (
+  `foodid` INT NOT NULL,
+  `foodname` VARCHAR(115) NULL,
+  `foodtype` VARCHAR(15) NULL,
+  `process` VARCHAR(15) NULL,
+  `edport` INT NULL,
+  `igclass` VARCHAR(15) NULL,
+  `igclassp` VARCHAR(15) NULL,
+  `fuclass` VARCHAR(15) NULL,
+  `fuclassp` VARCHAR(15) NULL,
+  PRIMARY KEY (`foodid`),
+  INDEX `fk_elintarvike_1_idx` (`igclass` ASC),
+  INDEX `fk_elintarvike_2_idx` (`igclassp` ASC),
+  INDEX `fk_elintarvike_3_idx` (`fuclass` ASC),
+  INDEX `fk_elintarvike_4_idx` (`fuclassp` ASC),
+  INDEX `fk_elintarvike_5_idx` (`process` ASC),
+  INDEX `fk_elintarvike_6_idx` (`foodtype` ASC),
+  CONSTRAINT `fk_elintarvike_1`
+    FOREIGN KEY (`igclass`)
+    REFERENCES `fineli`.`raakaaineluokka` (`thscode`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_elintarvike_2`
+    FOREIGN KEY (`igclassp`)
+    REFERENCES `fineli`.`raakaaineluokka` (`thscode`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_elintarvike_3`
+    FOREIGN KEY (`fuclass`)
+    REFERENCES `fineli`.`ruoankayttoluokka` (`thscode`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_elintarvike_4`
+    FOREIGN KEY (`fuclassp`)
+    REFERENCES `fineli`.`ruoankayttoluokka` (`thscode`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_elintarvike_5`
+    FOREIGN KEY (`process`)
+    REFERENCES `fineli`.`valmistustapa` (`thscode`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_elintarvike_6`
+    FOREIGN KEY (`foodtype`)
+    REFERENCES `fineli`.`elintarviketyyppi` (`thscode`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+COMMENT = 'food.csv\n\nfoodname: nimi (Kananmuna, luomu..)\n\nfoodtype: tyyppikoodi\n\nprocess: valmistustavan koodi\n\nedport: syötävä osuus, prosenttia\n\nigclass: raaka-aineluokan koodi\n\nigclassp: raaka-aineluokan koodi, ylempi taso\n\nfuclass: ruoankayttoluokan koodi\n\nfuclassp: ruoankayttoluokan koodi, ylempi taso';
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`menetelmatyyppi`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`menetelmatyyppi` (
+  `thscode` VARCHAR(2) NOT NULL,
+  `description` VARCHAR(55) NULL,
+  `lang` VARCHAR(2) NULL,
+  PRIMARY KEY (`thscode`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`ravintoarvo`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`ravintoarvo` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `foodid` INT NOT NULL,
+  `eufdname` VARCHAR(15) NULL,
+  `bestloc` DECIMAL(8,2) NULL,
+  `acqtype` CHAR(1) NULL,
+  `methtype` VARCHAR(2) NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_ravintoarvo_1_idx` (`foodid` ASC),
+  INDEX `fk_ravintoarvo_2_idx` (`eufdname` ASC),
+  INDEX `fk_ravintoarvo_3_idx` (`acqtype` ASC),
+  INDEX `fk_ravintoarvo_4_idx` (`methtype` ASC),
+  CONSTRAINT `fk_ravintoarvo_1`
+    FOREIGN KEY (`foodid`)
+    REFERENCES `fineli`.`elintarvike` (`foodid`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_ravintoarvo_2`
+    FOREIGN KEY (`eufdname`)
+    REFERENCES `fineli`.`ravintotekija` (`eufdname`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_ravintoarvo_3`
+    FOREIGN KEY (`acqtype`)
+    REFERENCES `fineli`.`tietolahde` (`thscode`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_ravintoarvo_4`
+    FOREIGN KEY (`methtype`)
+    REFERENCES `fineli`.`menetelmatyyppi` (`thscode`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+COMMENT = 'component_value.csv\n\r\nFOODID (Elintarvikkeen tunnus, numero)\n\r\nEUFDNAME (Ravintotekijän koodi, teksti)\r\n\nBESTLOC (Ravintoarvo, numero)\r\n\nACQTYPE (Tietolähteen koodi, teksti)\r\n\nMETHTYPE (Menetelmätyypin koodi, teksti)\n';
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`resepti`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`resepti` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `foodid` INT NULL,
+  `confdid` INT NULL,
+  `amount` DECIMAL(10,5) NULL,
+  `foodunit` CHAR(1) NULL,
+  `mass` DECIMAL(10,5) NULL,
+  `evremain` INT NULL,
+  `recyear` INT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_resepti_1_idx` (`foodid` ASC),
+  INDEX `fk_resepti_2_idx` (`confdid` ASC),
+  CONSTRAINT `fk_resepti_1`
+    FOREIGN KEY (`foodid`)
+    REFERENCES `fineli`.`elintarvike` (`foodid`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_resepti_2`
+    FOREIGN KEY (`confdid`)
+    REFERENCES `fineli`.`elintarvike` (`foodid`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`elintarvikeyksikko`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`elintarvikeyksikko` (
+  `thscode` VARCHAR(15) NOT NULL,
+  `description` VARCHAR(45) NULL,
+  `lang` VARCHAR(2) NULL,
+  PRIMARY KEY (`thscode`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`elintarvikemitat`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`elintarvikemitat` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `foodid` INT NULL,
+  `foodunit` VARCHAR(15) NULL,
+  `mass` DECIMAL(7,2) NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_elintarvikemitat_1_idx` (`foodid` ASC),
+  INDEX `fk_elintarvikemitat_2_idx` (`foodunit` ASC),
+  CONSTRAINT `fk_elintarvikemitat_1`
+    FOREIGN KEY (`foodid`)
+    REFERENCES `fineli`.`elintarvike` (`foodid`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_elintarvikemitat_2`
+    FOREIGN KEY (`foodunit`)
+    REFERENCES `fineli`.`elintarvikeyksikko` (`thscode`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`elintarvikenimi`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`elintarvikenimi` (
+  `foodid` INT NOT NULL,
+  `foodname` VARCHAR(115) NULL,
+  `lang` VARCHAR(2) NULL,
+  PRIMARY KEY (`foodid`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`erityisruokavalio_fi`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`erityisruokavalio_fi` (
+  `thscode` VARCHAR(15) NOT NULL,
+  `description` VARCHAR(500) NULL,
+  `lang` VARCHAR(25) NULL,
+  PRIMARY KEY (`thscode`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`erityisruokavalio`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`erityisruokavalio` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `foodid` INT NULL,
+  `specdiet` VARCHAR(15) NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_erityisruokavalio_1_idx` (`foodid` ASC),
+  INDEX `fk_erityisruokavalio_2_idx` (`specdiet` ASC),
+  CONSTRAINT `fk_erityisruokavalio_1`
+    FOREIGN KEY (`foodid`)
+    REFERENCES `fineli`.`elintarvike` (`foodid`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_erityisruokavalio_2`
+    FOREIGN KEY (`specdiet`)
+    REFERENCES `fineli`.`erityisruokavalio_fi` (`thscode`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;

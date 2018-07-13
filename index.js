@@ -1,0 +1,89 @@
+const mysql = require('mysql2/promise');
+
+const http = require('http')
+const express = require('express')
+const bodyParser = require('body-parser')
+const cors = require('cors')
+const app = express()
+const routerBasedata = require('./routerBasedata')
+const db = require('./db')
+
+app.use(cors())
+app.use(bodyParser.json())
+app.use('/basedata', routerBasedata)
+
+const server = http.createServer(app)
+
+const PORT = 3001
+
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+})
+
+const pool = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    database: 'fineli',
+    password: 'root',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+})
+
+async function main() {
+  const data = await pool.query(
+    'SELECT * FROM `base` WHERE `foodid` = 34611'
+  )
+  console.log(data)
+}
+
+async function getdata() {
+  const data = await db.query(
+    'SELECT foodname FROM `base` WHERE `foodid` = 34611'
+  )
+  console.log(data)
+}
+//getdata()
+//main()
+
+//const getConnection = () => pool.getConnection()
+
+// const getData = async () => {
+//   console.log(pool)
+//   const data = await pool.query('SELECT * FROM `base` WHERE `foodid` = 34611')
+//   console.log(data)
+// }
+
+// const pool = getPool().then(
+//   getData()
+// )
+
+//getData()
+
+server.on('close', () => {
+  // close connection..
+  pool.end()
+})
+
+// const getConnection = async () => {
+//   return await pool.getConnection((err, conn) => {
+
+//   })
+// }
+
+// const connection = mysql.createConnection({
+//   host: 'localhost',
+//   user: 'root',
+//   password: 'root',
+//   database: 'fineli'
+// });
+
+// connection.query(
+//   'SELECT * FROM `base` WHERE `foodid` = ?',
+//   [34661],
+//   function(err, results) {
+//     console.log(results);
+//   }
+// );
+
+module.exports = db
