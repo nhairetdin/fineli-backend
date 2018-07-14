@@ -29,7 +29,23 @@ CREATE TABLE elintarvike_ravintoarvot
 -- and index for it:
 CREATE INDEX idx_elintarvike_ravintoarvot_1 ON elintarvike_ravintoarvot(foodid);
 
+-- ravintotekijät ja tiedot yhdeksi tauluksi:
+SELECT 
+ ravintotekija.eufdname AS koodi, 
+ ravintotekijanimi.description AS nimi, 
+ ravintotekijayksikko.thscode AS yksikko,
+ r1.description AS luokka,
+ r2.description AS ylempiluokka
+FROM ravintotekija 
+ JOIN ravintotekijanimi ON ravintotekija.eufdname = ravintotekijanimi.thscode
+ JOIN ravintotekijayksikko ON ravintotekija.compunit = ravintotekijayksikko.thscode
+ JOIN ravintotekijaluokka r1 ON ravintotekija.cmpclass = r1.thscode
+ JOIN ravintotekijaluokka r2 ON ravintotekija.cmpclassp = r2.thscode
+ORDER BY ylempiluokka ASC, luokka ASC;
 
+-- ravintotekijä nimien/koodin maksimiarvo
+SELECT eufdname, MAX(bestloc) max, (MAX(bestloc) / 1000) AS step FROM ravintoarvo GROUP BY eufdname
+    
 
 
 

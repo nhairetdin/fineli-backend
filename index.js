@@ -14,7 +14,7 @@ app.use('/basedata', routerBasedata)
 
 const server = http.createServer(app)
 
-const PORT = 3001
+const PORT = 3002
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
@@ -30,19 +30,19 @@ const pool = mysql.createPool({
     queueLimit: 0
 })
 
-async function main() {
-  const data = await pool.query(
-    'SELECT * FROM `base` WHERE `foodid` = 34611'
-  )
-  console.log(data)
-}
+// async function main() {
+//   const data = await pool.query(
+//     'SELECT * FROM `base` WHERE `foodid` = 34611'
+//   )
+//   console.log(data)
+// }
 
-async function getdata() {
-  const data = await db.query(
-    'SELECT foodname FROM `base` WHERE `foodid` = 34611'
-  )
-  console.log(data)
-}
+// async function getdata() {
+//   const data = await db.query(
+//     'SELECT foodname FROM `base` WHERE `foodid` = 34611'
+//   )
+//   console.log(data)
+// }
 //getdata()
 //main()
 
@@ -62,7 +62,7 @@ async function getdata() {
 
 server.on('close', () => {
   // close connection..
-  pool.end()
+  db.end()
 })
 
 // const getConnection = async () => {
