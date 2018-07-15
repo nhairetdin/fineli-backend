@@ -1,3 +1,5 @@
+SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
+
 CREATE TABLE elintarvike_ravintoarvot
      SELECT elintarvike.foodid, elintarvike.foodname, ravintoarvo.eufdname, ravintoarvo.bestloc, ravintotekija.compunit, ravintotekijanimi.description 
      FROM elintarvike JOIN ravintoarvo 
@@ -144,4 +146,20 @@ CREATE TABLE base
  FROM elintarvike_extended GROUP BY FOODID;
 
 CREATE INDEX idx_base_1 ON base(foodid);
+
+CREATE TABLE ravintotekija_yksikko_luokka
+ SELECT 
+  ravintotekija.eufdname AS koodi, 
+  ravintotekijanimi.description AS nimi, 
+  ravintotekijayksikko.thscode AS yksikko,
+  r1.description AS luokka,
+  r2.description AS ylempiluokka
+ FROM ravintotekija 
+  JOIN ravintotekijanimi ON ravintotekija.eufdname = ravintotekijanimi.thscode
+  JOIN ravintotekijayksikko ON ravintotekija.compunit = ravintotekijayksikko.thscode
+  JOIN ravintotekijaluokka r1 ON ravintotekija.cmpclass = r1.thscode
+  JOIN ravintotekijaluokka r2 ON ravintotekija.cmpclassp = r2.thscode
+ ORDER BY ylempiluokka ASC, luokka ASC;
+
+CREATE INDEX idx_ryl_1 ON ravintotekija_yksikko_luokka(koodi);
 
