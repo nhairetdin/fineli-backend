@@ -2,6 +2,15 @@ const router = require('express').Router()
 const mysql = require('mysql2/promise');
 const db = require('./db')
 
+const priorities = {
+    'Hiilihydraattifraktiot': 4,
+    'Kivennäis- ja hivenaineet': 2,
+    'Perusravintoaineet': 6,
+    'Rasva': 3,
+    'Typpiyhdisteet': 1,
+    'Vitamiinit': 5
+}
+
 router.get('/food', async (req, res, next) => {
   //const db = await getConnection()
   const q1 = `SELECT * FROM base;`
@@ -14,8 +23,18 @@ router.get('/food', async (req, res, next) => {
 router.get('/components', async (req, res, next) => {
   const query = `SELECT * FROM ravintotekija_yksikko_luokka;`
   const [rows, fields] = await db.query(query)
+  ////////////////////////////////////////////
+  const rowsClassified = rows.reduce((res, i) => {
+    let luokka = i.ylempiluokka
+    res[luokka] = res[luokka] || { data: [], importance: priorities[luokka] }
+    res[luokka].data.push(i)
+    return res
+  }, {})
+  const rowsClassifiedArray = Object.keys(rowsClassified).map(i => rowsClassified[i])
+  const sorted = rowsClassifiedArray.sort((a, b) => b.importance - a.importance)
+  ////////////////////////////////////////////
   //console.log(rows)
-  res.json(rows)
+  res.json(sorted)
 })
 
 module.exports = router

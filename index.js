@@ -10,6 +10,7 @@ const db = require('./db')
 
 app.use(cors())
 app.use(bodyParser.json())
+app.use(express.static('build'))
 app.use('/basedata', routerBasedata)
 
 const server = http.createServer(app)
