@@ -353,6 +353,20 @@ CREATE TABLE IF NOT EXISTS `fineli`.`erityisruokavalio` (
 ENGINE = InnoDB;
 
 
+-- -----------------------------------------------------
+-- Table `fineli`.`user`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`user` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `email` VARCHAR(90) NOT NULL,
+  `passhash` CHAR(60) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC),
+  UNIQUE INDEX `passhash_UNIQUE` (`passhash` ASC))
+ENGINE = InnoDB;
+
+
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;

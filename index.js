@@ -6,12 +6,14 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const app = express()
 const routerBasedata = require('./routerBasedata')
+const routerUser = require('./routerUser')
 const db = require('./db')
 
 app.use(cors())
 app.use(bodyParser.json())
 app.use(express.static('build'))
 app.use('/basedata', routerBasedata)
+app.use('/user', routerUser)
 
 const server = http.createServer(app)
 
