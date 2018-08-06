@@ -34,7 +34,7 @@ router.get('/components', async (req, res, next) => {
   const sorted = rowsClassifiedArray.sort((a, b) => b.importance - a.importance)
   ////////////////////////////////////////////
   //console.log(rows)
-  res.json(sorted)
+  res.json({ originalRows: rows, classifiedRows: sorted })
 })
 
 module.exports = router
