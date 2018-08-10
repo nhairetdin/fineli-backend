@@ -360,10 +360,80 @@ CREATE TABLE IF NOT EXISTS `fineli`.`user` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `email` VARCHAR(90) NOT NULL,
   `passhash` CHAR(60) NOT NULL,
+  `gender` VARCHAR(6) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `id_UNIQUE` (`id` ASC),
   UNIQUE INDEX `email_UNIQUE` (`email` ASC),
   UNIQUE INDEX `passhash_UNIQUE` (`passhash` ASC))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`suositukset`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`suositukset` (
+  `user_id` VARCHAR(90) NOT NULL,
+  `alc` DECIMAL(8,2) NULL,
+  `enerc` DECIMAL(8,2) NULL,
+  `choavl` DECIMAL(8,2) NULL,
+  `prot` DECIMAL(8,2) NULL,
+  `fat` DECIMAL(8,2) NULL,
+  `vite` DECIMAL(8,2) NULL,
+  `vitd` DECIMAL(8,2) NULL,
+  `vitk` DECIMAL(8,2) NULL,
+  `carotens` DECIMAL(8,2) NULL,
+  `vita` DECIMAL(8,2) NULL,
+  `nia` DECIMAL(8,2) NULL,
+  `vitb12` DECIMAL(8,2) NULL,
+  `niaeq` DECIMAL(8,2) NULL,
+  `vitpyrid` DECIMAL(8,2) NULL,
+  `ribf` DECIMAL(8,2) NULL,
+  `fol` DECIMAL(8,2) NULL,
+  `thia` DECIMAL(8,2) NULL,
+  `vitc` DECIMAL(8,2) NULL,
+  `fibc` DECIMAL(8,2) NULL,
+  `fibins` DECIMAL(8,2) NULL,
+  `oa` DECIMAL(8,2) NULL,
+  `sugoh` DECIMAL(8,2) NULL,
+  `psacncs` DECIMAL(8,2) NULL,
+  `frus` DECIMAL(8,2) NULL,
+  `gals` DECIMAL(8,2) NULL,
+  `sucs` DECIMAL(8,2) NULL,
+  `glus` DECIMAL(8,2) NULL,
+  `sugar` DECIMAL(8,2) NULL,
+  `lacs` DECIMAL(8,2) NULL,
+  `mals` DECIMAL(8,2) NULL,
+  `starch` DECIMAL(8,2) NULL,
+  `fapu` DECIMAL(8,2) NULL,
+  `f18d3n3` DECIMAL(8,2) NULL,
+  `fapun3` DECIMAL(8,2) NULL,
+  `f20d5n3` DECIMAL(8,2) NULL,
+  `fapun6` DECIMAL(8,2) NULL,
+  `f22d6n3` DECIMAL(8,2) NULL,
+  `fasat` DECIMAL(8,2) NULL,
+  `fatrn` DECIMAL(8,2) NULL,
+  `fafre` DECIMAL(8,2) NULL,
+  `famcis` DECIMAL(8,2) NULL,
+  `f18d2cn6` DECIMAL(8,2) NULL,
+  `stert` DECIMAL(8,2) NULL,
+  `chole` DECIMAL(8,2) NULL,
+  `zn` DECIMAL(8,2) NULL,
+  `fe` DECIMAL(8,2) NULL,
+  `id` DECIMAL(8,2) NULL,
+  `se` DECIMAL(8,2) NULL,
+  `p` DECIMAL(8,2) NULL,
+  `k` DECIMAL(8,2) NULL,
+  `ca` DECIMAL(8,2) NULL,
+  `mg` DECIMAL(8,2) NULL,
+  `na` DECIMAL(8,2) NULL,
+  `nacl` DECIMAL(8,2) NULL,
+  `trp` DECIMAL(8,2) NULL,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `fk_suositukset_1`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `fineli`.`user` (`email`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 

@@ -3,8 +3,8 @@ const mysql = require('mysql2/promise');
 const db = require('./db')
 
 const priorities = {
-    'Hiilihydraattifraktiot': 4,
-    'Kivennäis- ja hivenaineet': 2,
+    'Hiilihydraattifraktiot': 2,
+    'Kivennäis- ja hivenaineet': 4,
     'Perusravintoaineet': 6,
     'Rasva': 3,
     'Typpiyhdisteet': 1,

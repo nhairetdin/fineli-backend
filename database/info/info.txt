@@ -152,7 +152,7 @@ SETUP:
   MAX(F22D6N3) F22D6N3,
   MAX(TRP) TRP,
   MAX(CHOLE) CHOLE,
-  MAX(STERT) STERT
+  MAX(STERT) STERT 
  FROM elintarvike_extended GROUP BY FOODID;
 
 12. CREATE INDEX idx_base_1 ON base(foodid);

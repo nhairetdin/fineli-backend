@@ -15,7 +15,8 @@ router.post('/', async (req, res) => {
     if (errorMsg.length === 0) {
       const user = {
         email: body.email,
-        passhash: await bcrypt.hash(body.password, 10)
+        passhash: await bcrypt.hash(body.password, 10),
+        gender: body.gender
       }
       const [results, fields] = await db.query('INSERT INTO user SET ?', user)
       const token = tokenForUser.sign({ email: body.email, id: results.insertId })
