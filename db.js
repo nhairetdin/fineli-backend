@@ -8,7 +8,8 @@ const pool = mysql.createPool({
     password: process.env.DB_PASS,
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0//,
+    queueLimit: 0,
+    multipleStatements: true//,
     // typeCast: function (field, next) {
     //     if (field.type.includes("DECIMAL")) {
     //     	//console.log(true)

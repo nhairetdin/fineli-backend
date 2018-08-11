@@ -22,9 +22,11 @@ router.get('/food', async (req, res, next) => {
 
 router.get('/components', async (req, res, next) => {
   const query = `SELECT * FROM ravintotekija_yksikko_luokka;`
-  const [rows, fields] = await db.query(query)
+  const query2 = `SELECT * FROM suositukset WHERE user_id = 'male';`
+  const [rows, fields] = await db.query(`${query}${query2}`)
+  console.log(rows)
   ////////////////////////////////////////////
-  const rowsClassified = rows.reduce((res, i) => {
+  const rowsClassified = rows[0].reduce((res, i) => {
     let luokka = i.ylempiluokka
     res[luokka] = res[luokka] || { data: [], importance: priorities[luokka] }
     res[luokka].data.push(i)
