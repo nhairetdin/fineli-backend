@@ -16,7 +16,8 @@ router.post('/', async (req, res) => {
       const user = {
         email: body.email,
         passhash: await bcrypt.hash(body.password, 10),
-        gender: body.gender
+        gender: body.gender,
+        recommendation: body.gender
       }
       const [results, fields] = await db.query('INSERT INTO user SET ?', user)
       const token = tokenForUser.sign({ email: body.email, id: results.insertId })
@@ -59,6 +60,25 @@ router.post('/session', async (req, res) => {
   }
 
   //res.status(200).json({ msg: 'valid' })
+})
+
+// userdata
+router.post('/profile', async (req, res) => {
+  const token = req.token
+  console.log(token)
+  const decodedToken = tokenForUser.verify(token)
+  console.log(decodedToken)
+  if (!token || !decodedToken.id) {
+    return res.status(401).json({ error: 'token missing or invalid' })
+  }
+  try {
+    const [result, fields] = await db.query('SELECT * FROM suositukset WHERE user_id IN (select recommendation from user where id = ?)', decodedToken.id)
+    console.log(result)
+    console.log("token valid: ", token)
+    res.status(200).json({ ...result })
+  } catch (e) {
+    res.status(503).json({ msg: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
+  }
 })
 
 const validateCredentials = (email) => {

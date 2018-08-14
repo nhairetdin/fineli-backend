@@ -354,21 +354,6 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `fineli`.`user`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `fineli`.`user` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `email` VARCHAR(90) NOT NULL,
-  `passhash` CHAR(60) NOT NULL,
-  `gender` VARCHAR(6) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
-  UNIQUE INDEX `email_UNIQUE` (`email` ASC),
-  UNIQUE INDEX `passhash_UNIQUE` (`passhash` ASC))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `fineli`.`suositukset`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `fineli`.`suositukset` (
@@ -432,6 +417,68 @@ CREATE TABLE IF NOT EXISTS `fineli`.`suositukset` (
   CONSTRAINT `fk_suositukset_1`
     FOREIGN KEY (`user_id`)
     REFERENCES `fineli`.`user` (`email`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`user`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`user` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `email` VARCHAR(90) NOT NULL,
+  `passhash` CHAR(60) NOT NULL,
+  `gender` VARCHAR(6) NOT NULL,
+  `recommendation` VARCHAR(90) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC),
+  UNIQUE INDEX `passhash_UNIQUE` (`passhash` ASC),
+  INDEX `fk_user_1_idx` (`recommendation` ASC),
+  CONSTRAINT `fk_user_1`
+    FOREIGN KEY (`recommendation`)
+    REFERENCES `fineli`.`suositukset` (`user_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`ateria`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`ateria` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `nimi` VARCHAR(45) NOT NULL,
+  `pvm` DATETIME NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
+  INDEX `fk_ateria_1_idx` (`user_id` ASC),
+  CONSTRAINT `fk_ateria_1`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `fineli`.`user` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `fineli`.`ateria_elintarvike`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `fineli`.`ateria_elintarvike` (
+  `ateria_id` INT NOT NULL,
+  `elintarvike_id` INT NOT NULL,
+  PRIMARY KEY (`ateria_id`, `elintarvike_id`),
+  INDEX `fk_ateria_elintarvike_2_idx` (`elintarvike_id` ASC),
+  CONSTRAINT `fk_ateria_elintarvike_1`
+    FOREIGN KEY (`ateria_id`)
+    REFERENCES `fineli`.`ateria` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_ateria_elintarvike_2`
+    FOREIGN KEY (`elintarvike_id`)
+    REFERENCES `fineli`.`elintarvike` (`foodid`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
