@@ -326,6 +326,7 @@ CREATE TABLE IF NOT EXISTS `fineli`.`erityisruokavalio_fi` (
   `thscode` VARCHAR(15) NOT NULL,
   `description` VARCHAR(500) NULL,
   `lang` VARCHAR(25) NULL,
+  `shortname` VARCHAR(90) NULL,
   PRIMARY KEY (`thscode`))
 ENGINE = InnoDB;
 

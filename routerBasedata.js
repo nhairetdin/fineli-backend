@@ -39,4 +39,11 @@ router.get('/components', async (req, res, next) => {
   res.json({ originalRows: rows, classifiedRows: sorted })
 })
 
+router.get('/specdiet', async (req, res, next) => {
+  const query = `SELECT * FROM erityisruokavalio_lyhennetty;`
+  const query2 = `SELECT thscode, shortname FROM erityisruokavalio_fi;`
+  const [rows, fields] = await db.query(`${query}${query2}`)
+  res.json(rows)
+})
+
 module.exports = router

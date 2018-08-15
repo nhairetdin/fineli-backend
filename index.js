@@ -1,6 +1,7 @@
 const mysql = require('mysql2/promise');
 
 const http = require('http')
+const compression = require('compression')
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
@@ -11,6 +12,7 @@ const db = require('./db')
 const tokenExtractor = require('./middlewareTokenExtractor')
 
 app.use(cors())
+app.use(compression({ level: 4 }))
 app.use(bodyParser.json())
 app.use(tokenExtractor.tokenExtractor)
 app.use(express.static('build'))

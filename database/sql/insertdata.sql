@@ -102,7 +102,7 @@ LOAD DATA LOCAL INFILE './database/data_csv/specdiet_FI.csv'
 INTO TABLE erityisruokavalio_fi
 FIELDS TERMINATED BY ';' ENCLOSED BY '' LINES TERMINATED BY '\n' 
 IGNORE 1 LINES 
-(thscode, description, lang);
+(thscode, description, lang, shortname);
 
 LOAD DATA LOCAL INFILE './database/data_csv/suositukset.csv' 
 INTO TABLE suositukset

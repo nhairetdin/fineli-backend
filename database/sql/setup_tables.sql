@@ -163,3 +163,12 @@ CREATE TABLE ravintotekija_yksikko_luokka
 
 CREATE INDEX idx_ryl_1 ON ravintotekija_yksikko_luokka(koodi);
 
+CREATE TABLE erityisruokavalio_lyhennetty
+ SELECT erityisruokavalio.foodid AS foodid, 
+  erityisruokavalio.specdiet AS specdiet
+ FROM erityisruokavalio 
+ JOIN erityisruokavalio_fi 
+ ON erityisruokavalio.specdiet = erityisruokavalio_fi.thscode
+ ORDER BY foodid;
+
+CREATE INDEX idx_erly_1 ON erityisruokavalio_lyhennetty(foodid);
