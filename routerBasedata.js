@@ -10,14 +10,44 @@ const priorities = {
     'Typpiyhdisteet': 1,
     'Vitamiinit': 5
 }
+const b1 = `SELECT * FROM base;`
+const b2 = `SELECT * FROM erityisruokavalio_lyhennetty;`
+
+let basedata
+db.query(`${b1}${b2}`).then((rows) => {
+  //const base = rows[0][0]
+  const specdiet = rows[0][1].reduce((result, row) => {
+    const foodid = row.foodid
+    if (result[foodid]) {
+      result[foodid] = [...result[foodid], row.specdiet]
+      return result
+    } else {
+      result = {...result, [foodid]: [row.specdiet]}
+      return result
+    }
+  }, {})
+
+  const base = rows[0][0].reduce((result, row) => {
+    if (result.length > 0) {
+      result = result.concat({...row, specdiet: specdiet[row.foodid]})
+    } else {
+      result = [{...row, specdiet: specdiet[row.foodid]}]
+    }
+    return result
+  },[])
+  //console.log("initial", specdiet)
+  basedata = base
+})
 
 router.get('/food', async (req, res, next) => {
   //const db = await getConnection()
-  const q1 = `SELECT * FROM base;`
-  const q2 = 'SELECT foodname FROM `base` WHERE `foodid` = 34611'
-  const [rows, fields] = await db.query(q1)
+  //const query = `SELECT * FROM base;`
+  //const query2 = `SELECT * FROM erityisruokavalio_lyhennetty;`
+  //const q2 = 'SELECT foodname FROM `base` WHERE `foodid` = 34611'
+  //const [rows, fields] = await db.query(query)
   //console.log(rows.sort((a, b) => parseFloat(b.ENERC) - parseFloat(a.ENERC)))
-  res.json(rows)
+  //console.log(rows)
+  res.json(basedata)
 })
 
 router.get('/components', async (req, res, next) => {
@@ -40,9 +70,9 @@ router.get('/components', async (req, res, next) => {
 })
 
 router.get('/specdiet', async (req, res, next) => {
-  const query = `SELECT * FROM erityisruokavalio_lyhennetty;`
-  const query2 = `SELECT thscode, shortname FROM erityisruokavalio_fi;`
-  const [rows, fields] = await db.query(`${query}${query2}`)
+  //const query = `SELECT * FROM erityisruokavalio_lyhennetty;`
+  const query = `SELECT thscode, shortname FROM erityisruokavalio_fi;`
+  const [rows, fields] = await db.query(query)
   res.json(rows)
 })
 
