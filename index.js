@@ -8,6 +8,7 @@ const cors = require('cors')
 const app = express()
 const routerBasedata = require('./routerBasedata')
 const routerUser = require('./routerUser')
+const routerMeal = require('./routerMeal')
 const db = require('./db')
 const tokenExtractor = require('./middlewareTokenExtractor')
 
@@ -18,6 +19,7 @@ app.use(tokenExtractor.tokenExtractor)
 app.use(express.static('build'))
 app.use('/basedata', routerBasedata)
 app.use('/user', routerUser)
+app.use('/meal', routerMeal)
 
 const server = http.createServer(app)
 

@@ -6,7 +6,15 @@ const sign = (user) => {
 }
 
 const verify = (token) => {
-  return jwt.verify(token, process.env.SECRET)
+  const verified = jwt.verify(token, process.env.SECRET, (err, decoded) => {
+  	if (err) {
+  	  return err
+  	} else {
+  	  return decoded
+  	}
+  })
+  console.log("verified: ",verified)
+  return verified
 }
 
 module.exports = { sign, verify }

@@ -35,7 +35,7 @@ db.query(`${b1}${b2}`).then((rows) => {
     }
     return result
   },[])
-  //console.log("initial", specdiet)
+  console.log("initial")
   basedata = base
 })
 

@@ -58,24 +58,23 @@ router.post('/session', async (req, res) => {
   } catch (e) {
     res.status(503).json({ msg: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
   }
-
-  //res.status(200).json({ msg: 'valid' })
 })
 
-// userdata
+// userdata, fetch user specific data: suggestions, saved meals
 router.post('/profile', async (req, res) => {
   const token = req.token
   console.log(token)
   const decodedToken = tokenForUser.verify(token)
   console.log(decodedToken)
   if (!token || !decodedToken.id) {
+    console.log("invalid token")
     return res.status(401).json({ error: 'token missing or invalid' })
   }
   try {
-    const [result, fields] = await db.query('SELECT * FROM suositukset WHERE user_id IN (select recommendation from user where id = ?)', decodedToken.id)
-    console.log(result)
-    console.log("token valid: ", token)
-    res.status(200).json({ ...result })
+    const [suggestions, fields] = await db.query(querySuggestions, decodedToken.id)
+    const [result2, fields2] = await db.query(queryMeals, decodedToken.id)
+    const meals = formatRows(result2)
+    res.status(200).json([...suggestions, [...meals]])
   } catch (e) {
     res.status(503).json({ msg: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
   }
@@ -84,5 +83,47 @@ router.post('/profile', async (req, res) => {
 const validateCredentials = (email) => {
   return validator.validate(email)
 }
+
+const formatRows = (rows) => {
+  const reduced = rows.reduce((res, row) => {
+    if (res[row.meal_id]) {
+      res[row.meal_id] = { 
+        ...res[row.meal_id], 
+        foods: [ ...res[row.meal_id].foods, 
+        { foodid: row.foodid, foodname: row.foodname, amount: row.amount } ] }
+    } else {
+      res[row.meal_id] = {
+        meal_id: row.meal_id, 
+        name: row.name, 
+        pvm: row.pvm, 
+        foods: [{ foodid: row.foodid, foodname: row.foodname, amount: row.amount }]
+      }
+    }
+    return res
+  }, {})
+
+  return Object.keys(reduced).map(obj => {
+    return { ...reduced[obj] }
+  })
+}
+
+const querySuggestions = 
+`SELECT * FROM suositukset WHERE user_id IN (select recommendation from user where id = ?);`
+
+const queryMeals = 
+`
+  SELECT 
+   ateria.id as meal_id, 
+   ateria.user_id, 
+   ateria.name, 
+   SUBSTRING(ateria.pvm, 1, 10) as pvm, 
+   ateria_elintarvike.foodid, 
+   elintarvike.foodname, 
+   ateria_elintarvike.amount 
+  FROM ateria 
+   JOIN ateria_elintarvike ON ateria.id = ateria_elintarvike.meal_id
+   JOIN elintarvike ON ateria_elintarvike.foodid = elintarvike.foodid
+  WHERE user_id = ?;
+`
 
 module.exports = router
