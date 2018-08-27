@@ -99,13 +99,34 @@ router.post('/', async (req, res) => {
   	const promiseArray = meal.foods.map(food => db.query(`INSERT INTO ateria_elintarvike SET ?;`, { meal_id: insertId, foodid: food.foodid, amount: food.amount }))
   	//console.log(added)
   	await Promise.all(promiseArray)
-  	return res.json({ ...meal, meal_id: insertId, pvm: pvm.slice(0, 10) })
+  	return res.json({ ...meal, meal_id: insertId, pvm: pvm.slice(0, 10), notSaved: false })
   } catch(e) {
   	console.log(e)
   	res.status(503).json({ msg: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
   }
 
   return res.status(200)
+})
+
+router.delete('/:id', async (req, res) => {
+	const decodedToken = tokenForUser.verify(req.token)
+  if (!decodedToken) {
+    return res.status(401).json({ error: 'token missing or invalid' })
+  }
+  try {
+  	const q1 = `DELETE FROM ateria_elintarvike WHERE meal_id = ?;`
+  	const q2 = `DELETE FROM ateria WHERE id = ?;`
+  	await Promise.all([
+  		db.query(q1, req.params.id),
+  		db.query(q2, req.params.id)
+  	])
+  	return res.status(204).json({ msg: 'successful delete'})
+  } catch(e) {
+  	console.log(e)
+  	res.status(503).json({ msg: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
+  }
+  //console.log("req.params.id: " + req.params.id)
+  //return res.status(204).end()
 })
 
 const getDateString = () => {
