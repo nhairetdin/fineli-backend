@@ -114,13 +114,17 @@ router.delete('/:id', async (req, res) => {
     return res.status(401).json({ error: 'token missing or invalid' })
   }
   try {
-  	const q1 = `DELETE FROM ateria_elintarvike WHERE meal_id = ?;`
-  	const q2 = `DELETE FROM ateria WHERE id = ?;`
-  	await Promise.all([
-  		db.query(q1, req.params.id),
-  		db.query(q2, req.params.id)
-  	])
-  	return res.status(204).json({ msg: 'successful delete'})
+  	if (await isMealOwner(req.params.id, decodedToken.id)) {
+	  	const q1 = `DELETE FROM ateria_elintarvike WHERE meal_id = ?;`
+	  	const q2 = `DELETE FROM ateria WHERE id = ?;`
+	  	await Promise.all([
+	  		db.query(q1, req.params.id),
+	  		db.query(q2, req.params.id)
+	  	])
+	  	return res.status(204).json({ msg: 'successful delete'})
+    } else {
+    	return res.status(403).json({ msg: 'Forbidden. Request ID is not the meal owner' })
+    }
   } catch(e) {
   	console.log(e)
   	res.status(503).json({ msg: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
@@ -128,6 +132,34 @@ router.delete('/:id', async (req, res) => {
   //console.log("req.params.id: " + req.params.id)
   //return res.status(204).end()
 })
+
+router.put('/', async (req, res) => {
+	const token = req.token
+  const decodedToken = tokenForUser.verify(token)
+  if (!token || !decodedToken.id) {
+    return res.status(401).json({ error: 'token missing or invalid' })
+  }
+  const meal = req.body
+  console.log(meal)
+  try {
+  	if (await isMealOwner(meal.meal_id, decodedToken.id)) {
+	  	const updateRes = await db.query(`UPDATE ateria SET name = ? WHERE id = ?`, [meal.name, meal.meal_id])
+	  	const deleteRes = await db.query(`DELETE FROM ateria_elintarvike WHERE meal_id = ?`, meal.meal_id)
+	  	const promiseArray = meal.foods.map(food => db.query(`INSERT INTO ateria_elintarvike SET ?;`, { meal_id: meal.meal_id, foodid: food.foodid, amount: food.amount }))
+	  	await Promise.all(promiseArray)
+	  	return res.json({ ...meal, notSaved: false })
+  	} else {
+  		return res.status(403).json({ msg: 'Forbidden. Request ID is not the meal owner' })
+  	}
+  } catch (e) {
+  	res.status(503).json({ msg: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
+  }
+})
+
+const isMealOwner = async (meal_id, user_id) => {
+	const resultset = await db.query(`SELECT id, ateria.name FROM ateria WHERE user_id = ? AND id = ?;`, [user_id, meal_id])
+	return resultset[0].length === 0 ? false : true
+}
 
 const getDateString = () => {
 	const date = new Date()
