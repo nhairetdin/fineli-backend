@@ -147,6 +147,8 @@ CREATE TABLE base
 
 CREATE INDEX idx_base_1 ON base(foodid);
 
+ALTER TABLE ateria_elintarvike ADD CONSTRAINT fk_ateria_elintarvike_3 FOREIGN KEY (foodid) REFERENCES base(foodid);
+
 CREATE TABLE ravintotekija_yksikko_luokka
  SELECT 
   ravintotekija.eufdname AS koodi, 

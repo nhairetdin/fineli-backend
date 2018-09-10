@@ -18,31 +18,6 @@ const queryMeals =
 	WHERE user_id = ?;
 `
 
-// const test = async () => {
-// 	const [rows, fields] = await db.query(queryMeals)
-// 	//console.log(rows)
-
-// 	const r = rows.reduce((res, row) => {
-// 		if (res[row.meal_id]) {
-// 			res[row.meal_id] = { ...res[row.meal_id], foods: [ ...res[row.meal_id].foods, { foodid: row.foodid, foodname: row.foodname, amount: row.amount } ] }
-// 		} else {
-// 			res[row.meal_id] = {
-// 				meal_id: row.meal_id, 
-// 				name: row.name, 
-// 				pvm: row.pvm, 
-// 				foods: [{ foodid: row.foodid, foodname: row.foodname, amount: row.amount }]
-// 			}
-// 		}
-// 		return res
-// 	}, {})
-// 	const arr = Object.keys(r).map(obj => {
-// 		return { ...r[obj] }
-// 	})
-// 	console.log(r)
-// 	console.log(arr)
-// }
-// test()
-
 // GET ALL MEALS FOR A USER
 router.get('/', async (req, res, next) => {
 	const token = req.token
@@ -198,3 +173,28 @@ module.exports = router
 		// }
 			//foods: res[row.meal_id].foods ? res[row.meal_id].foods.concat({ name: row.foodname }) : [{ name: row.foodname }] }
 		//res[row.meal_id][foods[row.foodid]] = res[row.meal_id][foods[row.foodid]] || { foodid: row.foodid }
+
+// const test = async () => {
+// 	const [rows, fields] = await db.query(queryMeals)
+// 	//console.log(rows)
+
+// 	const r = rows.reduce((res, row) => {
+// 		if (res[row.meal_id]) {
+// 			res[row.meal_id] = { ...res[row.meal_id], foods: [ ...res[row.meal_id].foods, { foodid: row.foodid, foodname: row.foodname, amount: row.amount } ] }
+// 		} else {
+// 			res[row.meal_id] = {
+// 				meal_id: row.meal_id, 
+// 				name: row.name, 
+// 				pvm: row.pvm, 
+// 				foods: [{ foodid: row.foodid, foodname: row.foodname, amount: row.amount }]
+// 			}
+// 		}
+// 		return res
+// 	}, {})
+// 	const arr = Object.keys(r).map(obj => {
+// 		return { ...r[obj] }
+// 	})
+// 	console.log(r)
+// 	console.log(arr)
+// }
+// test()

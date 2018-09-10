@@ -23,11 +23,14 @@ router.post('/', async (req, res) => {
       const token = tokenForUser.sign({ email: body.email, id: results.insertId })
       console.log("decoded user:", tokenForUser.verify(token))
       console.log("user added with id", results.insertId)
+      await db.query(querySetRecommendationRow, [user.email, user.gender])
+      await db.query(`UPDATE user SET recommendation = ? WHERE id = ?;`, [user.email, results.insertId])
       res.json({ token, email: body.email })
     } else {
       res.status(401).json({ error: errorMsg })
     }
   } catch (e) {
+    console.log(e)
     let msg = "error"
     if (e.errno === 1062) {
       msg = "Antamasi email-osoite on jo rekisteröity palveluun."
@@ -74,10 +77,41 @@ router.post('/profile', async (req, res) => {
     const [suggestions, fields] = await db.query(querySuggestions, decodedToken.id)
     const [result2, fields2] = await db.query(queryMeals, decodedToken.id)
     const meals = formatRows(result2)
+    delete suggestions[0]['user_id'] // user_id field is not needed here
+    console.log(suggestions)
     res.status(200).json([...suggestions, [...meals]])
   } catch (e) {
     res.status(503).json({ msg: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
   }
+})
+
+router.post('/settings', async (req, res) => {
+  const token = req.token
+  const decodedToken = tokenForUser.verify(token)
+  if (!token || !decodedToken.id) {
+    console.log("invalid token")
+    return res.status(401).json({ error: 'token missing or invalid' })
+  }
+  try {
+    validatedValues = { ...req.body }
+    Object.keys(req.body).forEach(key => {
+      let value = req.body[key]
+      console.log(value)
+      if (typeof value !== 'number' || isNaN(value)) {
+        value = 0
+      }
+      validatedValues[key] = value
+    })
+
+    const result = await db.query(`UPDATE suositukset SET ? WHERE ?`, [validatedValues, { user_id: decodedToken.email}])
+    const [suggestions, fields] = await db.query(querySuggestions, decodedToken.id)
+    delete suggestions[0]['user_id'] // user_id field is not needed here
+    return res.json({ ...suggestions[0] })
+  } catch (e) {
+    return res.status(503).json({ msg: 'Virhe palvelussa, yritä myöhemmin uudelleen.' })
+  }
+  console.log(req.body)
+  res.json({ msg: "ok" })
 })
 
 const validateCredentials = (email) => {
@@ -124,6 +158,125 @@ const queryMeals =
    JOIN ateria_elintarvike ON ateria.id = ateria_elintarvike.meal_id
    JOIN elintarvike ON ateria_elintarvike.foodid = elintarvike.foodid
   WHERE user_id = ?;
+`
+
+const querySetRecommendationRow = `
+  INSERT INTO suositukset (
+    user_id, 
+    alc, 
+    enerc, 
+    choavl, 
+    prot, 
+    fat, 
+    vite, 
+    vitd, 
+    vitk, 
+    carotens, 
+    vita, 
+    nia, 
+    vitb12, 
+    niaeq, 
+    vitpyrid, 
+    ribf, 
+    fol, 
+    thia, 
+    vitc, 
+    fibc, 
+    fibins, 
+    oa, 
+    sugoh, 
+    psacncs, 
+    frus, 
+    gals, 
+    sucs, 
+    glus, 
+    sugar, 
+    lacs, 
+    mals, 
+    starch, 
+    fapu, 
+    f18d3n3, 
+    fapun3, 
+    f20d5n3, 
+    fapun6, 
+    f22d6n3, 
+    fasat, 
+    fatrn, 
+    fafre, 
+    famcis, 
+    f18d2cn6, 
+    stert, 
+    chole, 
+    zn, 
+    fe, 
+    id, 
+    se, 
+    p, 
+    k, 
+    ca, 
+    mg,
+    na, 
+    nacl, 
+    trp
+  ) 
+  SELECT 
+    ?,
+    alc, 
+    enerc, 
+    choavl, 
+    prot, 
+    fat, 
+    vite, 
+    vitd, 
+    vitk, 
+    carotens, 
+    vita, 
+    nia, 
+    vitb12, 
+    niaeq, 
+    vitpyrid, 
+    ribf, 
+    fol, 
+    thia, 
+    vitc, 
+    fibc, 
+    fibins, 
+    oa, 
+    sugoh, 
+    psacncs, 
+    frus, 
+    gals, 
+    sucs, 
+    glus, 
+    sugar, 
+    lacs, 
+    mals, 
+    starch, 
+    fapu, 
+    f18d3n3, 
+    fapun3, 
+    f20d5n3, 
+    fapun6, 
+    f22d6n3, 
+    fasat, 
+    fatrn, 
+    fafre, 
+    famcis, 
+    f18d2cn6, 
+    stert, 
+    chole, 
+    zn, 
+    fe, 
+    id, 
+    se, 
+    p, 
+    k, 
+    ca, 
+    mg,
+    na, 
+    nacl, 
+    trp
+  FROM suositukset WHERE user_id = ?;
 `
 
 module.exports = router
