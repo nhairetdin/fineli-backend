@@ -1,4 +1,4 @@
 node_modules
 build
-database/info/fineli.mwb.bak
+database/info
 .env
