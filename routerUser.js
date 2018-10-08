@@ -59,7 +59,7 @@ router.post('/session', async (req, res) => {
     const token = tokenForUser.sign({ email: req.body.email, id: result[0].id })
     res.status(200).json({ token, email: req.body.email })
   } catch (e) {
-    res.status(503).json({ msg: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
+    res.status(503).json({ error: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
   }
 })
 
@@ -81,7 +81,7 @@ router.post('/profile', async (req, res) => {
     console.log(suggestions)
     res.status(200).json([...suggestions, [...meals]])
   } catch (e) {
-    res.status(503).json({ msg: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
+    res.status(503).json({ error: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
   }
 })
 
@@ -108,10 +108,10 @@ router.post('/settings', async (req, res) => {
     delete suggestions[0]['user_id'] // user_id field is not needed here
     return res.json({ ...suggestions[0] })
   } catch (e) {
-    return res.status(503).json({ msg: 'Virhe palvelussa, yritä myöhemmin uudelleen.' })
+    return res.status(503).json({ error: 'Virhe palvelussa, yritä myöhemmin uudelleen.' })
   }
-  console.log(req.body)
-  res.json({ msg: "ok" })
+  //console.log(req.body)
+  //res.json({ msg: "ok" })
 })
 
 const validateCredentials = (email) => {

@@ -2,61 +2,6 @@ const router = require('express').Router()
 const tokenForUser = require('./tokenForUser')
 const db = require('./db')
 
-const queryMeals = 
-`
-	SELECT 
-	 ateria.id as meal_id, 
-	 ateria.user_id, 
-	 ateria.name, 
-	 SUBSTRING(ateria.pvm, 1, 10) as pvm, 
-	 ateria_elintarvike.foodid, 
-	 elintarvike.foodname, 
-	 ateria_elintarvike.amount 
-	FROM ateria 
-	 JOIN ateria_elintarvike ON ateria.id = ateria_elintarvike.meal_id
-	 JOIN elintarvike ON ateria_elintarvike.foodid = elintarvike.foodid
-	WHERE user_id = ?;
-`
-
-// GET ALL MEALS FOR A USER
-router.get('/', async (req, res, next) => {
-	const token = req.token
-  console.log(token)
-  const decodedToken = tokenForUser.verify(token)
-  if (!token || !decodedToken.id) {
-    return res.status(401).json({ error: 'token missing or invalid' })
-  }
-  try {
-		const [rows, fields] = await db.query(queryMeals, decodedToken.id)
-		res.json(formatRows(rows))
-  } catch (e) {
-  	res.status(503).json({ msg: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
-  }
-})
-
-const formatRows = (rows) => {
-	const reduced = rows.reduce((res, row) => {
-		if (res[row.meal_id]) {
-			res[row.meal_id] = { 
-				...res[row.meal_id], 
-				foods: [ ...res[row.meal_id].foods, 
-				{ foodid: row.foodid, foodname: row.foodname, amount: row.amount } ] }
-		} else {
-			res[row.meal_id] = {
-				meal_id: row.meal_id, 
-				name: row.name, 
-				pvm: row.pvm, 
-				foods: [{ foodid: row.foodid, foodname: row.foodname, amount: row.amount }]
-			}
-		}
-		return res
-	}, {})
-
-	return Object.keys(reduced).map(obj => {
-		return { ...reduced[obj] }
-	})
-}
-
 // SAVE NEW MEAL
 router.post('/', async (req, res) => {
 	const token = req.token
@@ -77,7 +22,7 @@ router.post('/', async (req, res) => {
   	return res.json({ ...meal, meal_id: insertId, pvm: pvm.slice(0, 10), notSaved: false })
   } catch(e) {
   	console.log(e)
-  	res.status(503).json({ msg: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
+  	res.status(503).json({ error: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
   }
 
   return res.status(200)
@@ -98,11 +43,11 @@ router.delete('/:id', async (req, res) => {
 	  	])
 	  	return res.status(204).json({ msg: 'successful delete'})
     } else {
-    	return res.status(403).json({ msg: 'Forbidden. Request ID is not the meal owner' })
+    	return res.status(403).json({ error: 'Forbidden. Request ID is not the meal owner' })
     }
   } catch(e) {
   	console.log(e)
-  	res.status(503).json({ msg: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
+  	res.status(503).json({ error: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
   }
   //console.log("req.params.id: " + req.params.id)
   //return res.status(204).end()
@@ -124,10 +69,10 @@ router.put('/', async (req, res) => {
 	  	await Promise.all(promiseArray)
 	  	return res.json({ ...meal, notSaved: false })
   	} else {
-  		return res.status(403).json({ msg: 'Forbidden. Request ID is not the meal owner' })
+  		return res.status(403).json({ error: 'Forbidden. Request ID is not the meal owner' })
   	}
   } catch (e) {
-  	res.status(503).json({ msg: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
+  	res.status(503).json({ error: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
   }
 })
 
@@ -153,48 +98,3 @@ const addLeadingZeroIfNeeded = (string) => {
 }
 
 module.exports = router
-
-		// if (res[row.meal_id]) {
-		// 	res[row.meal_id] = { ...res[row.meal_id], foods: { ...res[row.meal_id].foods, [row.foodid]: { foodname: row.foodname} } }
-		// } else {
-		// 	res[row.meal_id] = {
-		// 		meal_id: row.meal_id, 
-		// 		name: row.name, 
-		// 		pvm: row.pvm, 
-		// 		foods: { [row.foodid]: { foodname: row.foodname } }
-		// 	}
-		// }
-
-		// res[row.meal_id] = { ...res[row.meal_id], foods: { ...res[row.meal_id].foods, [row.foodid]: { foodname: row.foodname} } } || { 
-		// 	meal_id: row.meal_id, 
-		// 	name: row.name, 
-		// 	pvm: row.pvm, 
-		// 	foods: res[row.meal_id].foods ?  : false
-		// }
-			//foods: res[row.meal_id].foods ? res[row.meal_id].foods.concat({ name: row.foodname }) : [{ name: row.foodname }] }
-		//res[row.meal_id][foods[row.foodid]] = res[row.meal_id][foods[row.foodid]] || { foodid: row.foodid }
-
-// const test = async () => {
-// 	const [rows, fields] = await db.query(queryMeals)
-// 	//console.log(rows)
-
-// 	const r = rows.reduce((res, row) => {
-// 		if (res[row.meal_id]) {
-// 			res[row.meal_id] = { ...res[row.meal_id], foods: [ ...res[row.meal_id].foods, { foodid: row.foodid, foodname: row.foodname, amount: row.amount } ] }
-// 		} else {
-// 			res[row.meal_id] = {
-// 				meal_id: row.meal_id, 
-// 				name: row.name, 
-// 				pvm: row.pvm, 
-// 				foods: [{ foodid: row.foodid, foodname: row.foodname, amount: row.amount }]
-// 			}
-// 		}
-// 		return res
-// 	}, {})
-// 	const arr = Object.keys(r).map(obj => {
-// 		return { ...r[obj] }
-// 	})
-// 	console.log(r)
-// 	console.log(arr)
-// }
-// test()
