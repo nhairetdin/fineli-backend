@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs')
 const router = require('express').Router()
 const mysql = require('mysql2/promise')
 const db = require('./db')
-const validator = require("email-validator")
+const validator = require('email-validator')
 const tokenForUser = require('./tokenForUser')
 require('dotenv').config()
 
@@ -10,7 +10,9 @@ require('dotenv').config()
 router.post('/', async (req, res) => {
   try {
     const body = req.body
-    let errorMsg = validateCredentials(body.email) ? '' : 'Virheellinen sähköposti.'
+    let errorMsg = validateCredentials(body.email)
+      ? ''
+      : 'Virheellinen sähköposti.'
     errorMsg += body.password.length > 5 ? '' : ' Liian lyhyt salasana.'
     if (errorMsg.length === 0) {
       const user = {
@@ -20,20 +22,26 @@ router.post('/', async (req, res) => {
         recommendation: body.gender
       }
       const [results, fields] = await db.query('INSERT INTO user SET ?', user)
-      const token = tokenForUser.sign({ email: body.email, id: results.insertId })
-      console.log("decoded user:", tokenForUser.verify(token))
-      console.log("user added with id", results.insertId)
+      const token = tokenForUser.sign({
+        email: body.email,
+        id: results.insertId
+      })
+      console.log('decoded user:', tokenForUser.verify(token))
+      console.log('user added with id', results.insertId)
       await db.query(querySetRecommendationRow, [user.email, user.gender])
-      await db.query(`UPDATE user SET recommendation = ? WHERE id = ?;`, [user.email, results.insertId])
+      await db.query(`UPDATE user SET recommendation = ? WHERE id = ?;`, [
+        user.email,
+        results.insertId
+      ])
       res.json({ token, email: body.email })
     } else {
       res.status(401).json({ error: errorMsg })
     }
   } catch (e) {
     console.log(e)
-    let msg = "error"
+    let msg = 'error'
     if (e.errno === 1062) {
-      msg = "Antamasi email-osoite on jo rekisteröity palveluun."
+      msg = 'Antamasi email-osoite on jo rekisteröity palveluun.'
     }
     res.status(500).json({ error: msg })
   }
@@ -41,25 +49,30 @@ router.post('/', async (req, res) => {
 
 // login
 router.post('/session', async (req, res) => {
-  console.log("login attempt",req.body)
+  console.log('login attempt', req.body)
   if (!req.body.email || !req.body.password) {
     return res.status(400).send()
   }
 
   try {
-    const [result, fields] = await db.query('SELECT id, email, passhash FROM user WHERE email = ?', req.body.email)
+    const [result, fields] = await db.query(
+      'SELECT id, email, passhash FROM user WHERE email = ?',
+      req.body.email
+    )
 
-    if(result.length === 0) {
-      return res.status(401).json({ error: 'Sähköposti ei ole rekisteröity.'})
+    if (result.length === 0) {
+      return res.status(401).json({ error: 'Sähköposti ei ole rekisteröity.' })
     }
-    if(!await bcrypt.compare(req.body.password, result[0].passhash)) {
-      return res.status(401).json({ error: 'Virheellinen salasana.'})
+    if (!(await bcrypt.compare(req.body.password, result[0].passhash))) {
+      return res.status(401).json({ error: 'Virheellinen salasana.' })
     }
 
     const token = tokenForUser.sign({ email: req.body.email, id: result[0].id })
     res.status(200).json({ token, email: req.body.email })
   } catch (e) {
-    res.status(503).json({ error: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
+    res
+      .status(503)
+      .json({ error: 'Virhe palvelussa, yritä myöhemmin uudelleen.' })
   }
 })
 
@@ -70,18 +83,23 @@ router.post('/profile', async (req, res) => {
   const decodedToken = tokenForUser.verify(token)
   console.log(decodedToken)
   if (!token || !decodedToken.id) {
-    console.log("invalid token")
+    console.log('invalid token')
     return res.status(401).json({ error: 'token missing or invalid' })
   }
   try {
-    const [suggestions, fields] = await db.query(querySuggestions, decodedToken.id)
+    const [suggestions, fields] = await db.query(
+      querySuggestions,
+      decodedToken.id
+    )
     const [result2, fields2] = await db.query(queryMeals, decodedToken.id)
     const meals = formatRows(result2)
     delete suggestions[0]['user_id'] // user_id field is not needed here
     console.log(suggestions)
     res.status(200).json([...suggestions, [...meals]])
   } catch (e) {
-    res.status(503).json({ error: 'Virhe palvelussa, yritä myöhemmin uudelleen.'})
+    res
+      .status(503)
+      .json({ error: 'Virhe palvelussa, yritä myöhemmin uudelleen.' })
   }
 })
 
@@ -89,7 +107,7 @@ router.post('/settings', async (req, res) => {
   const token = req.token
   const decodedToken = tokenForUser.verify(token)
   if (!token || !decodedToken.id) {
-    console.log("invalid token")
+    console.log('invalid token')
     return res.status(401).json({ error: 'token missing or invalid' })
   }
   try {
@@ -103,34 +121,47 @@ router.post('/settings', async (req, res) => {
       validatedValues[key] = value
     })
 
-    const result = await db.query(`UPDATE suositukset SET ? WHERE ?`, [validatedValues, { user_id: decodedToken.email}])
-    const [suggestions, fields] = await db.query(querySuggestions, decodedToken.id)
+    const result = await db.query(`UPDATE suositukset SET ? WHERE ?`, [
+      validatedValues,
+      { user_id: decodedToken.email }
+    ])
+    const [suggestions, fields] = await db.query(
+      querySuggestions,
+      decodedToken.id
+    )
     delete suggestions[0]['user_id'] // user_id field is not needed here
     return res.json({ ...suggestions[0] })
   } catch (e) {
-    return res.status(503).json({ error: 'Virhe palvelussa, yritä myöhemmin uudelleen.' })
+    return res
+      .status(503)
+      .json({ error: 'Virhe palvelussa, yritä myöhemmin uudelleen.' })
   }
   //console.log(req.body)
   //res.json({ msg: "ok" })
 })
 
-const validateCredentials = (email) => {
+const validateCredentials = email => {
   return validator.validate(email)
 }
 
-const formatRows = (rows) => {
+const formatRows = rows => {
   const reduced = rows.reduce((res, row) => {
     if (res[row.meal_id]) {
-      res[row.meal_id] = { 
-        ...res[row.meal_id], 
-        foods: [ ...res[row.meal_id].foods, 
-        { foodid: row.foodid, foodname: row.foodname, amount: row.amount } ] }
+      res[row.meal_id] = {
+        ...res[row.meal_id],
+        foods: [
+          ...res[row.meal_id].foods,
+          { foodid: row.foodid, foodname: row.foodname, amount: row.amount }
+        ]
+      }
     } else {
       res[row.meal_id] = {
-        meal_id: row.meal_id, 
-        name: row.name, 
-        pvm: row.pvm, 
-        foods: [{ foodid: row.foodid, foodname: row.foodname, amount: row.amount }]
+        meal_id: row.meal_id,
+        name: row.name,
+        pvm: row.pvm,
+        foods: [
+          { foodid: row.foodid, foodname: row.foodname, amount: row.amount }
+        ]
       }
     }
     return res
@@ -141,11 +172,9 @@ const formatRows = (rows) => {
   })
 }
 
-const querySuggestions = 
-`SELECT * FROM suositukset WHERE user_id IN (select recommendation from user where id = ?);`
+const querySuggestions = `SELECT * FROM suositukset WHERE user_id IN (select recommendation from user where id = ?);`
 
-const queryMeals = 
-`
+const queryMeals = `
   SELECT 
    ateria.id as meal_id, 
    ateria.user_id, 

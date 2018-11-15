@@ -3,38 +3,38 @@ const router = require('express').Router()
 const db = require('./db')
 
 const priorities = {
-    'Hiilihydraattifraktiot': 2,
-    'Kivennäis- ja hivenaineet': 4,
-    'Perusravintoaineet': 6,
-    'Rasva': 3,
-    'Typpiyhdisteet': 1,
-    'Vitamiinit': 5
+  Hiilihydraattifraktiot: 2,
+  'Kivennäis- ja hivenaineet': 4,
+  Perusravintoaineet: 6,
+  Rasva: 3,
+  Typpiyhdisteet: 1,
+  Vitamiinit: 5
 }
 const b1 = `SELECT * FROM base;`
 const b2 = `SELECT * FROM erityisruokavalio_lyhennetty;`
 
 let basedata
-db.query(`${b1}${b2}`).then((rows) => {
+db.query(`${b1}${b2}`).then(rows => {
   const specdiet = rows[0][1].reduce((result, row) => {
     const foodid = row.foodid
     if (result[foodid]) {
       result[foodid] = [...result[foodid], row.specdiet]
       return result
     } else {
-      result = {...result, [foodid]: [row.specdiet]}
+      result = { ...result, [foodid]: [row.specdiet] }
       return result
     }
   }, {})
 
   const base = rows[0][0].reduce((result, row) => {
     if (result.length > 0) {
-      result = result.concat({...row, specdiet: specdiet[row.foodid]})
+      result = result.concat({ ...row, specdiet: specdiet[row.foodid] })
     } else {
-      result = [{...row, specdiet: specdiet[row.foodid]}]
+      result = [{ ...row, specdiet: specdiet[row.foodid] }]
     }
     return result
-  },[])
-  console.log("initial")
+  }, [])
+  console.log('initial')
   basedata = base
 })
 
@@ -52,7 +52,9 @@ router.get('/components', async (req, res, next) => {
     res[luokka].data.push(i)
     return res
   }, {})
-  const rowsClassifiedArray = Object.keys(rowsClassified).map(i => rowsClassified[i])
+  const rowsClassifiedArray = Object.keys(rowsClassified).map(
+    i => rowsClassified[i]
+  )
   const sorted = rowsClassifiedArray.sort((a, b) => b.importance - a.importance)
 
   res.json({ originalRows: rows, classifiedRows: sorted })
