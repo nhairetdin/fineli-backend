@@ -1,5 +1,5 @@
 const router = require('express').Router()
-const mysql = require('mysql2/promise');
+//const mysql = require('mysql2/promise');
 const db = require('./db')
 
 const priorities = {
@@ -15,7 +15,6 @@ const b2 = `SELECT * FROM erityisruokavalio_lyhennetty;`
 
 let basedata
 db.query(`${b1}${b2}`).then((rows) => {
-  //const base = rows[0][0]
   const specdiet = rows[0][1].reduce((result, row) => {
     const foodid = row.foodid
     if (result[foodid]) {
@@ -40,13 +39,6 @@ db.query(`${b1}${b2}`).then((rows) => {
 })
 
 router.get('/food', async (req, res, next) => {
-  //const db = await getConnection()
-  //const query = `SELECT * FROM base;`
-  //const query2 = `SELECT * FROM erityisruokavalio_lyhennetty;`
-  //const q2 = 'SELECT foodname FROM `base` WHERE `foodid` = 34611'
-  //const [rows, fields] = await db.query(query)
-  //console.log(rows.sort((a, b) => parseFloat(b.ENERC) - parseFloat(a.ENERC)))
-  //console.log(rows)
   res.json(basedata)
 })
 
@@ -54,8 +46,6 @@ router.get('/components', async (req, res, next) => {
   const query = `SELECT * FROM ravintotekija_yksikko_luokka;`
   const query2 = `SELECT * FROM suositukset WHERE user_id = 'male';`
   const [rows, fields] = await db.query(`${query}${query2}`)
-  console.log(rows)
-  ////////////////////////////////////////////
   const rowsClassified = rows[0].reduce((res, i) => {
     let luokka = i.ylempiluokka
     res[luokka] = res[luokka] || { data: [], importance: priorities[luokka] }
@@ -64,13 +54,11 @@ router.get('/components', async (req, res, next) => {
   }, {})
   const rowsClassifiedArray = Object.keys(rowsClassified).map(i => rowsClassified[i])
   const sorted = rowsClassifiedArray.sort((a, b) => b.importance - a.importance)
-  ////////////////////////////////////////////
-  //console.log(rows)
+
   res.json({ originalRows: rows, classifiedRows: sorted })
 })
 
 router.get('/specdiet', async (req, res, next) => {
-  //const query = `SELECT * FROM erityisruokavalio_lyhennetty;`
   const query = `SELECT thscode, shortname FROM erityisruokavalio_fi;`
   const [rows, fields] = await db.query(query)
   res.json(rows)
