@@ -1,23 +1,18 @@
-const mysql = require('mysql2/promise');
-require('dotenv').config()
+const mysql = require('mysql2/promise')
+
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 
 const pool = mysql.createPool({
-    host: 'localhost',
+    host: process.env.DB_HOST,
     user: process.env.DB_USER,
-    database: 'fineli',
+    database: process.env.DB_NAME,
     password: process.env.DB_PASS,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
-    multipleStatements: true//,
-    // typeCast: function (field, next) {
-    //     if (field.type.includes("DECIMAL")) {
-    //     	//console.log(true)
-    //         var value = field.string();
-    //         return (value === null) ? 0 : parseFloat(value);
-    //     }
-    //     return next();
-    // }
+    multipleStatements: true
 })
 
 module.exports = pool
