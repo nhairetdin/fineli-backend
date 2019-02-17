@@ -14,7 +14,7 @@ router.post('/', async (req, res) => {
   const querySaveNewMeal = `INSERT INTO ateria SET ?;`
 
   try {
-    const pvm = getDateString()
+    const pvm = getDateString(null)
     const added = await db.query(querySaveNewMeal, {
       user_id: decodedToken.id,
       name: meal.name,
@@ -72,6 +72,7 @@ router.delete('/:id', async (req, res) => {
   }
 })
 
+// Update meal
 router.put('/', async (req, res) => {
   const token = req.token
   const decodedToken = tokenForUser.verify(token)
@@ -111,6 +112,47 @@ router.put('/', async (req, res) => {
   }
 })
 
+router.put('/date/:id', async (req, res) => {
+  const token = req.token
+  const decodedToken = tokenForUser.verify(token)
+  if (!token || !decodedToken.id) {
+    return res.status(401).json({ error: 'token missing or invalid' })
+  }
+
+  try {
+    if (await isMealOwner(req.params.id, decodedToken.id)) {
+      const date = req.body
+      const dateString = getDateString(dateFromObj(date))
+  
+      await db.query(
+        `UPDATE ateria SET pvm = ? WHERE id = ?`,
+        [dateString, req.params.id]
+      )
+    } else {
+      return res
+        .status(403)
+        .json({ error: 'Forbidden. Request ID is not the meal owner' })
+    }
+  } catch (err) {
+    res
+      .status(503)
+      .json({ error: 'Virhe palvelussa, yritä myöhemmin uudelleen.' })
+  }
+
+  return res.status(200).json({ msg: 'successfully updated date' })
+})
+
+const dateFromObj = (obj) => {
+  const date = new Date()
+  date.setFullYear(obj.year)
+  date.setMonth(obj.month)
+  date.setDate(obj.day)
+  date.setHours(obj.hours)
+  date.setMinutes(obj.minutes)
+  date.setSeconds(obj.seconds)
+  return date
+}
+
 const isMealOwner = async (meal_id, user_id) => {
   const resultset = await db.query(
     `SELECT id, ateria.name FROM ateria WHERE user_id = ? AND id = ?;`,
@@ -119,8 +161,8 @@ const isMealOwner = async (meal_id, user_id) => {
   return resultset[0].length === 0 ? false : true
 }
 
-const getDateString = () => {
-  const date = new Date()
+const getDateString = (d) => {
+  const date = d || new Date()
   const year = date.getFullYear()
   let month = parseInt(date.getMonth()) + 1
   month = addLeadingZeroIfNeeded(month.toString())
