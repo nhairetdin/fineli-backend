@@ -115,6 +115,7 @@ router.put('/', async (req, res) => {
 router.put('/date/:id', async (req, res) => {
   const token = req.token
   const decodedToken = tokenForUser.verify(token)
+  let dateString
   if (!token || !decodedToken.id) {
     return res.status(401).json({ error: 'token missing or invalid' })
   }
@@ -122,7 +123,7 @@ router.put('/date/:id', async (req, res) => {
   try {
     if (await isMealOwner(req.params.id, decodedToken.id)) {
       const date = req.body
-      const dateString = getDateString(dateFromObj(date))
+      dateString = getDateString(dateFromObj(date))
   
       await db.query(
         `UPDATE ateria SET pvm = ? WHERE id = ?`,
@@ -139,7 +140,10 @@ router.put('/date/:id', async (req, res) => {
       .json({ error: 'Virhe palvelussa, yritä myöhemmin uudelleen.' })
   }
 
-  return res.status(200).json({ msg: 'successfully updated date' })
+  return res.status(200).json({ 
+    msg: 'successfully updated date',
+    dateString: dateString.split(" ")[0] // return date as yyyy-mm-dd
+  })
 })
 
 const dateFromObj = (obj) => {
